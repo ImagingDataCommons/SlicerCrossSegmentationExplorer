@@ -29,27 +29,11 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <spacer name="verticalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>12</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_17">
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Select a Volume:</string>
+          <string>Select a volume:</string>
          </property>
         </widget>
        </item>
@@ -68,7 +52,64 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="addSegmentationsButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Add segmentations</string>
+         </property>
+        </widget>
+       </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>8</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <widget class="QLabel" name="label_segmentation">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Select segmentations:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ctkCheckableComboBox" name="SegmentationsCheckableComboBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_or">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>or</string>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_18">
@@ -78,7 +119,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Select Segmentation Models: </string>
+          <string>Select segmentation models: </string>
          </property>
         </widget>
        </item>
@@ -105,53 +146,6 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label_or">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>OR</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_15">
-       <item>
-        <widget class="QLabel" name="label_segmentation">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Select Segmentations:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ctkCheckableComboBox" name="SegmentationsCheckableComboBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="verticalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>8</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_19">
        <item>
         <widget class="QLabel" name="label_views">
@@ -159,7 +153,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Instantiate Views:</string>
+          <string>Enable 2D &amp; 3D views:</string>
          </property>
         </widget>
        </item>
@@ -169,7 +163,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>3D Views</string>
+          <string>3D views</string>
          </property>
         </widget>
        </item>
@@ -179,7 +173,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>2D View</string>
+          <string>2D view</string>
          </property>
         </widget>
        </item>
@@ -193,34 +187,47 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Instantiate Vertical Layout (optional):</string>
+          <string>Vertical/horizontal layout:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBoxVertical">
+        <widget class="QRadioButton" name="verticalButton">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="text">
-          <string/>
+          <string>Vetical </string>
          </property>
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+        <widget class="QRadioButton" name="horizontalButton">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
+         <property name="text">
+          <string>Horizontal</string>
          </property>
-        </spacer>
+        </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>12</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -230,7 +237,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Options</string>
+          <string>View and display options</string>
          </property>
          <property name="collapsed">
           <bool>true</bool>
@@ -246,21 +253,21 @@
               <item>
                <widget class="QLabel" name="label_4">
                 <property name="text">
-                 <string>Link Views:</string>
+                 <string>Link views:</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QCheckBox" name="link3DViewCheckBox">
                 <property name="text">
-                 <string>3D Views</string>
+                 <string>3D views</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QCheckBox" name="link2DViewCheckBox">
                 <property name="text">
-                 <string>2D Views</string>
+                 <string>2D views</string>
                 </property>
                </widget>
               </item>
@@ -271,7 +278,7 @@
               <item>
                <widget class="QLabel" name="label_segRepresentation">
                 <property name="text">
-                 <string>Change Segmentation representation to Outline:</string>
+                 <string>Show outlines in 2D:</string>
                 </property>
                </widget>
               </item>
@@ -312,7 +319,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Segment by Segment Comparison</string>
+          <string>Segment-wise comparison across models</string>
          </property>
          <property name="collapsed">
           <bool>true</bool>
@@ -329,7 +336,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Select Segmentation Group:</string>
+               <string>Select segmentation group:</string>
               </property>
              </widget>
             </item>
@@ -393,7 +400,7 @@
                </size>
               </property>
               <property name="columnCount">
-               <number>9</number>
+               <number>4</number>
               </property>
               <attribute name="horizontalHeaderVisible">
                <bool>true</bool>
@@ -404,39 +411,6 @@
               <attribute name="horizontalHeaderDefaultSectionSize">
                <number>168</number>
               </attribute>
-              <column>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>../../../../../../../../.designer/Icons/SlicerVisibleInvisible.png</normaloff>../../../../../../../../.designer/Icons/SlicerVisibleInvisible.png</iconset>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>../../../../../../../../.designer/Icons/SlicerAddTransform.png</normaloff>../../../../../../../../.designer/Icons/SlicerAddTransform.png</iconset>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Opacity</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Name</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Amount</string>
-               </property>
-              </column>
               <column/>
               <column/>
               <column/>

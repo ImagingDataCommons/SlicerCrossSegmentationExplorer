@@ -8,6 +8,10 @@ import numpy as np
 import random
 import os
 import json
+import DICOMLib
+import DICOMLib.DICOMUtils
+from qt import QProgressDialog, QApplication
+import pydicom
 
 #Restores Layout after saving in mrml file
 def _restoreCustomLayout(caller, event):
@@ -76,6 +80,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             'invisible'     : qt.QIcon(os.path.join(base_path, "Resources", "Icons", "SlicerInvisible.png")),
         }
         self.setUp = False
+        self._alreadyEnteredOnce = False
 
     def setup(self):
         """
@@ -118,6 +123,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.segModelDialog.hide()
 
         self.ui.openModelButton.clicked.connect(self.showSegModelDialog)
+        self.ui.openModelButton.setToolTip("Group multiple segmentation files into one model for joint display. Models include segmentation files whose series descriptions contain keywords associated with that model. Click '+' to add or modify models and their keywords.")
         self.dialogUi.okTableButton.clicked.connect(lambda checked=False: self.segModelDialog.accept())
 
         self.dialogUi.addRowButton.clicked.connect(self.onAddRow)
@@ -130,6 +136,8 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.segGroupDialog.hide()
 
         self.ui.openGroupButton.clicked.connect(self.showSegGroupDialog)
+        self.ui.openGroupButton.setToolTip("Segmentation groups include segments whose names contain keywords associated with that group. Click '+' to add or modify segmentation groups and their keywords.")
+        self.ui.lableSegmentationGroup.setToolTip("A collection of segments automatically grouped based on keywords (e.g., 'rib', 'lung')")
         self.dialogGroupUi.okTableButton.clicked.connect(lambda checked=False: self.segGroupDialog.accept())
 
         self.dialogGroupUi.addGrouptable.itemChanged.connect(self.onGroupTableItemChanged)
@@ -138,13 +146,16 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         #Connections for Model and Segmentation Connection
         self.ui.volumeNodeComboBox.currentNodeChanged.connect(self.onVolumeChanged)
+        self.ui.addSegmentationsButton.clicked.connect(self.onLoadSegmentations)
         self.ui.ModelCheckableComboBox.checkedIndexesChanged.connect(self.onModelChanged)
         self.ui.SegmentationsCheckableComboBox.checkedIndexesChanged.connect(self.onModelChanged)
 
         #Connections for the Layout Selection
         self.ui.threedCheckbox.clicked.connect(self.updateLayout)
         self.ui.twodCheckbox.clicked.connect(self.updateLayout)
-        self.ui.checkBoxVertical.clicked.connect(self.updateLayout)
+        self.ui.verticalButton.clicked.connect(lambda: self.updateAlignment(self.ui.verticalButton))
+        self.ui.horizontalButton.clicked.connect(lambda: self.updateAlignment(self.ui.horizontalButton))
+
 
         #Connections for the Options Collapsible Button
         self.ui.link3DViewCheckBox.clicked.connect(self.onLinkThreeDViewChanged)
@@ -174,6 +185,10 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Called each time the user opens this module.
         """
         # Make sure parameter node exists and observed
+        if not self._alreadyEnteredOnce:
+            self._alreadyEnteredOnce = True
+            return
+        self.changeSegmentationFiles()
         self.initializeParameterNode()
 
     def exit(self):
@@ -245,7 +260,6 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             "ShowNeighborsMultiple": self.ui.showNeighboringcheckBoxMultiple,
             "Show3D":              self.ui.threedCheckbox,
             "Show2D":              self.ui.twodCheckbox,
-            "VerticalLayout":      self.ui.checkBoxVertical,
             "3DLink":              self.ui.link3DViewCheckBox,
             "2DLink":              self.ui.link2DViewCheckBox,
             "OutlineRep":          self.ui.outlineCheckBox,
@@ -254,6 +268,13 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             val = self._parameterNode.GetParameter(key)
             if val is not None:
                 widget.setChecked(val == "True")
+
+        #Update Radiobuttons for vertical/horizontal layout based on the Value saved in the parameter Node
+        val_vertical = self._parameterNode.GetParameter("VerticalLayout")
+        self.ui.verticalButton.setChecked(val_vertical == "True")
+        self.ui.horizontalButton.setChecked(val_vertical == "False")
+
+        
 
         #Only called once in the beginning to set up the scene after Reloading, saving or initialization
         if not self.setUp:
@@ -270,8 +291,8 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         """
         Initiliazes the Layout and the Funktions based on the values in the Parameter Node once after opening the Module
         """
-        self.onVolumeChanged()
         #Set the Layout of the Pop up tables
+        self.onVolumeChanged()
         self._setupModelGroupTable()
 
         #Get Checked Segmentation IDs -> To restore Checked Segmentations from the parameter Node
@@ -390,7 +411,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         if tableName:
             table = self.ui.segmentationTableWidget
             for row in range(table.rowCount):
-                item = table.item(row, 3)
+                item = table.item(row, 2)
                 if item and item.text() == tableName:
                     table.selectRow(row)
                     found = True
@@ -405,25 +426,26 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         table = self.ui.segmentationTableWidget
         table.clearContents()
         #5 colums
-        table.setColumnCount(5)
+        table.setColumnCount(4)
         #Icons for header
         headers = [
             ( self._icons['header_visible'], ""),
-            (self._icons['header_color'], ""),
-            (None, "Opacity"),  
+            (self._icons['header_color'], ""),  
             (None, "Name"),  
-            (None, "Number of Segmentations") 
+            (None, "Number of segmentations") 
         ]
         #Set colum header
         for col, (icon, text) in enumerate(headers):
             item = qt.QTableWidgetItem(icon, text) if icon else qt.QTableWidgetItem(text)
             table.setHorizontalHeaderItem(col, item)
         hdr = table.horizontalHeader()
-        for c in (0, 1, 2, 4):
+        for c in (0, 1, 3):
             hdr.setSectionResizeMode(c, qt.QHeaderView.ResizeToContents)
-        hdr.setSectionResizeMode(3, qt.QHeaderView.Stretch)
+        hdr.setSectionResizeMode(2, qt.QHeaderView.Stretch)
         table.setHorizontalScrollBarPolicy(qt.Qt.ScrollBarAlwaysOff)
         hdr.setVisible(True)
+        table.setSortingEnabled(True)
+    
 
     def updateParameterNodeFromGUI(self, caller=None, event=None):
         """
@@ -438,7 +460,6 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         self._parameterNode.SetNodeReferenceID("CurrentVolumeNode", self.ui.volumeNodeComboBox.currentNodeID)
 
-        self._parameterNode.SetParameter("ShowNeighbors", 'True' if self.ui.showNeighborsCheckBox.checked else 'False')
         self._parameterNode.SetParameter("ShowNeighborsMultiple", 'True' if self.ui.showNeighboringcheckBoxMultiple.checked else 'False')
 
         selectedIds = [ index.data() for index in self.ui.ModelCheckableComboBox.checkedIndexes() ]
@@ -449,7 +470,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         self._parameterNode.SetParameter("Show3D", "True" if self.ui.threedCheckbox.checked else "False")
         self._parameterNode.SetParameter("Show2D", "True" if self.ui.twodCheckbox.checked else "False")
-        self._parameterNode.SetParameter("VerticalLayout", "True" if self.ui.checkBoxVertical.checked else "False")
+        self._parameterNode.SetParameter("VerticalLayout", "True" if self.ui.verticalButton.checked else "False")
         self._parameterNode.SetParameter("3DLink", "True" if self.ui.link3DViewCheckBox.checked else "False")
         self._parameterNode.SetParameter("2DLink", "True" if self.ui.link2DViewCheckBox.checked else "False")
         self._parameterNode.SetParameter("OutlineRep", "True" if self.ui.outlineCheckBox.checked else "False")
@@ -459,7 +480,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             return
 
         selected_row = sel[0].row()
-        name = self.ui.segmentationTableWidget.item(selected_row, 3).text()
+        name = self.ui.segmentationTableWidget.item(selected_row, 2).text()
 
         self._parameterNode.SetParameter("VerificationTableSelection", name)
 
@@ -702,11 +723,87 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.ui.label_models.setEnabled(True)
         self.ui.ModelCheckableComboBox.setEnabled(True)
         self.ui.openModelButton.setEnabled(True)
+        self.ui.addSegmentationsButton.setEnabled(True)
         #Diables the Options and the Segment by Segment comparison
         for btn in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
             btn.setEnabled(False)
             btn.collapsed = True
+
+    def onLoadSegmentations(self):
+        volumeNode = self.ui.volumeNodeComboBox.currentNode()
+        instanceUIDsString = volumeNode.GetAttribute("DICOM.instanceUIDs")
+
+        if instanceUIDsString:
+            firstInstanceUID = instanceUIDsString.split()[0]
+            filePath = slicer.dicomDatabase.fileForInstance(firstInstanceUID)
+            seriesUID = slicer.dicomDatabase.seriesForFile(filePath)
+            self.logic.loadDicomSeries(seriesUID)
+            self.changeSegmentationFiles()
+
+    def changeSegmentationFiles(self):
+        self._buildSegmentationVolumeMap()
+        segmentationVolumeMap = self._segmentationVolumeMap
+        if not segmentationVolumeMap:
+            return
+
+        combo = self.ui.SegmentationsCheckableComboBox
+
+        combo.blockSignals(True)
+
+        try:
+            previouslyChecked = {
+                combo.itemText(i)
+                for i in range(combo.count)
+                if combo.model().item(i).checkState() == qt.Qt.Checked
+            }
+            currentItems = {
+                combo.itemText(i): combo.model().item(i)
+                for i in range(combo.count)
+            }
+            segs = self.get_segmentations_for_volume()
+            segNames = {seg.GetName() for seg in segs}
+            for name in list(currentItems.keys()):
+                if name not in segNames:
+                    index = combo.findText(name)
+                    if index != -1:
+                        combo.removeItem(index)
+            
+            for name in sorted(segNames):
+                if name not in currentItems:
+                    combo.addItem(name)
+                    item = combo.model().item(combo.count - 1)
+                    item.setCheckState(qt.Qt.Unchecked)
+
+            for i in range(combo.count):
+                name = combo.itemText(i)
+                item = combo.model().item(i)
+                if name in previouslyChecked:
+                    item.setCheckState(qt.Qt.Checked)
+                else:
+                    item.setCheckState(qt.Qt.Unchecked)
+
+        finally:
+            combo.blockSignals(False)
+
+        if self.hasCheckedItems(combo) or self.hasCheckedItems(self.ui.ModelCheckableComboBox):
+            self.updateLayout()
+
+    def hasCheckedItems(self, comboBox):
+        for i in range(comboBox.count):
+            item = comboBox.model().item(i)
+            if item.checkState() == qt.Qt.Checked:
+                return True
+        return False
+    
+    def updateAlignment(self, sender):
+        if sender == self.ui.verticalButton:
+            self.ui.horizontalButton.setChecked(False)
+        else:
+            self.ui.verticalButton.setChecked(False)
+        
+        self.updateLayout()
+
         
     def onModelChanged(self):
         """
@@ -729,13 +826,15 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         #Enables/Disables ui Layout options dependig on the hasSelection value
         for w in (self.ui.threedCheckbox, self.ui.twodCheckbox,
-                self.ui.label_views, self.ui.label_layout, self.ui.checkBoxVertical):
+                self.ui.label_views, self.ui.label_layout, self.ui.verticalButton, self.ui.horizontalButton):
             w.setEnabled(hasSelection)
         
         #Enables/Disables threeD checkbox dependig if models are checked in the checkable combo box -> 3D View and 3D Link are activated loading a new Model
         #Checkboxes are updated through the observer that is called when the parameter node is changed
-        self._parameterNode.SetParameter("Show3D", "True" if hasSelection else "False")
-        self._parameterNode.SetParameter("Show2D", self._parameterNode.GetParameter("Show2D") if hasSelection else "False")
+        #self._parameterNode.SetParameter("Show3D", "True" if hasSelection else "False")
+        #self._parameterNode.SetParameter("Show2D", self._parameterNode.GetParameter("Show2D") if hasSelection else "False")
+        self._parameterNode.SetParameter("Show3D", self._parameterNode.GetParameter("Show3D") if hasSelection else "False")
+        self._parameterNode.SetParameter("Show2D", "True" if hasSelection else "False")
         self._parameterNode.SetParameter("VerticalLayout", self._parameterNode.GetParameter("VerticalLayout") if hasSelection else "False")
         self._parameterNode.SetParameter("OutlineRep", self._parameterNode.GetParameter("OutlineRep") if (self._parameterNode.GetParameter("Show2D") == "True") else "False")
         self._parameterNode.EndModify(wasModified)
@@ -789,7 +888,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         #get Checkboxes
         threed_enabled = self.ui.threedCheckbox.isChecked()
         twod_enabled = self.ui.twodCheckbox.isChecked()
-        vertical_layout = self.ui.checkBoxVertical.isChecked()
+        vertical_layout = self.ui.verticalButton.isChecked()
         #Set Parameternodes for Checkboxes
         wasModified = self._parameterNode.StartModify()
         self._parameterNode.SetParameter("VerticalLayout", str(vertical_layout))
@@ -836,6 +935,10 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         #Set 3D Link by default, when 3D View is selected
         self.ui.link3DViewCheckBox.setChecked(threeD)
         self.onLinkThreeDViewChanged()
+
+        #Set 2D Link by default, when 2D View is selected
+        self.ui.link2DViewCheckBox.setChecked(twoD)
+        self.onLinkTwoDViewChanged()
 
         if threeD or twoD:
             #Load Segmentation Groups in the dropdown
@@ -1137,15 +1240,18 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         table.setSelectionMode(qt.QAbstractItemView.SingleSelection)
         table.verticalHeader().setVisible(False)
         ico_v, ico_i = self._icons['visible'], self._icons['invisible']
+        #palette = table.palette
+        #base_color = palette.color(qt.QPalette.Base)
+        #alt_base_color = palette.color(qt.QPalette.AlternateBase)
         #Add information to rows
         for row, (struct, amt) in enumerate(counts.items()):
             #Backgroundcolor (alternating)
-            bg = qt.QColor(50, 50, 50) if row % 2 == 0 else qt.QColor(30, 30, 30)
+            #bg = alt_base_color if row % 2 == 0 else base_color
             d = info[struct]
             #Set Visibility and Backgroundcolor
             itm = qt.QTableWidgetItem() 
             itm.setIcon(ico_v if d['visibility'] else ico_i)
-            itm.setBackground(bg)
+            #itm.setBackground(bg)
             table.setItem(row, 0, itm)
             #Add Segmentation Structure color as square in the second column
             lbl = qt.QLabel()
@@ -1153,13 +1259,12 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             c = d['color']
             px.fill(qt.QColor(*(int(v*255) for v in c)))
             lbl.setPixmap(px)
-            lbl.setStyleSheet(f"background:{bg.name()}")
             lbl.setAlignment(qt.Qt.AlignCenter)
             table.setCellWidget(row, 1, lbl)
-            #Write text cells in table (structurename, opacity, amount)
-            for col, text in ((2, f"{d['opacity']:.2f}"), (3, struct), (4, str(amt))):
+            #Write text cells in table (structurename, amount)
+            for col, text in ((2, struct), (3, str(amt))):
                 cell = qt.QTableWidgetItem(text)
-                cell.setBackground(bg)
+                #cell.setBackground(bg)
                 table.setItem(row, col, cell)
         table.viewport().update()
 
@@ -1175,7 +1280,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         
         selected_row = sel[0].row()
         #Save selected structure in parameter Node
-        name = table.item(selected_row, 3).text()
+        name = table.item(selected_row, 2).text()
         self._parameterNode.SetParameter("VerificationTableSelection", name)
 
         #Get the loaded segmentation Nodes
@@ -1277,8 +1382,6 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         """
         Initialize parameter node with default settings.
         """
-        if not parameterNode.GetParameter("ShowNeighbors"):
-            parameterNode.SetParameter("ShowNeighbors", "False")
 
         if not parameterNode.GetParameter("ShowNeighborsMultiple"):
             parameterNode.SetParameter("ShowNeighborsMultiple", "False")
@@ -1389,9 +1492,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         if segNode is not None:
             segmentationNode = segNode
             showNeighbors = parameterNode.GetParameter("ShowNeighborsMultiple") == 'True'
-        else:
-            segmentationNode = parameterNode.GetNodeReference("CurrentSegmentationNode")
-            showNeighbors = parameterNode.GetParameter("ShowNeighbors") == 'True'
+
         if not segmentationNode:
             raise ValueError("No segmentation node is selected")
 
@@ -1609,6 +1710,85 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         layout_xml += '</layout>'
     
         return layout_xml
+    
+    #Load all Segmentation files for chosen Volume
+    def getReferencedCtSeries(self, segmentation_uid):
+        dicom_database = slicer.dicomDatabase
+        series_files = dicom_database.filesForSeries(segmentation_uid)
+        if not series_files:
+            return None
+        
+        try:
+            ds = pydicom.dcmread(series_files[0], stop_before_pixels = True)
+            return ds.ReferencedSeriesSequence[0].SeriesInstanceUID
+        except Exception as e:
+            return None
+        
+    def getSegmentationSopInstanceUID(self, series_uid):
+        dicom_database = slicer.dicomDatabase
+        files = dicom_database.filesForSeries(series_uid)
+        if not files:
+            return None
+        try:
+            ds = pydicom.dcmread(files[0], stop_before_pixels=True)
+            return ds.SOPInstanceUID
+        except Exception:
+            return None
+
+
+    def loadDicomSeries(self,series_instance_uid):
+        dicom_database = slicer.dicomDatabase
+        if not dicom_database:
+            return
+        
+        series_files = dicom_database.filesForSeries(series_instance_uid)
+        if not series_files:
+            return
+        
+        study_uid = dicom_database.studyForSeries(series_instance_uid)
+        if not study_uid:
+            return
+        
+        segmentation_series = [
+        uid for uid in dicom_database.seriesForStudy(study_uid)
+        if uid != series_instance_uid
+        and dicom_database.fieldForSeries("Modality", uid) == "SEG"
+        and self.getReferencedCtSeries(uid) == series_instance_uid
+        ]
+
+        if not segmentation_series:
+            return
+
+        progressDialog = QProgressDialog("Load DICOM-Segmentations...", "Cancel", 0, 100, slicer.util.mainWindow())
+        progressDialog.windowTitle = "Processing..."
+        progressDialog.setWindowModality(2)
+        progressDialog.setMinimumDuration(0)
+        progressDialog.setValue(0)
+
+        total = len(segmentation_series)
+        for index, seg_uid in enumerate(segmentation_series):
+            sop_uid = self.getSegmentationSopInstanceUID(seg_uid)
+            alreadyLoaded = any(
+                str(segNode.GetAttribute("DICOM.instanceUIDs")) == sop_uid
+                for segNode in slicer.util.getNodesByClass("vtkMRMLSegmentationNode")
+            )
+            if alreadyLoaded:
+                continue
+            #Add check that no segmentation is loaded twice
+            description = dicom_database.fieldForSeries("SeriesDescription", seg_uid)
+            def progressCallback(pluginName, percent):
+                overallProgress = (index + percent / 100.0) / total * 100
+                progressDialog.setLabelText(f"Loading {description}")
+                progressDialog.setValue(int(overallProgress))
+                QApplication.processEvents()
+                return progressDialog.wasCanceled
+
+            DICOMLib.DICOMUtils.loadSeriesByUID([seg_uid], progressCallback=progressCallback)
+
+            if progressDialog.wasCanceled:
+                break
+
+        progressDialog.close()
 
 
 #
