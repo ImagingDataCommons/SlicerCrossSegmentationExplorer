@@ -1,4 +1,4 @@
-# Segmentation Verification
+# CrossSegmentationExplorer
 
 Extension containing a 3D Slicer module (Segmentation Verification) for verifying the result of AI segmentation. The extension consists of two components:
 1. **Segmentation Verification** – Allows quick and intuitive review of individual segments (masks or labels) within a single segmentation.
