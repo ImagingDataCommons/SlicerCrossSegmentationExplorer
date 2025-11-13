@@ -166,6 +166,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.ui.segmentGroupComboBox.currentIndexChanged.connect(self.onSegmentGroupChanged)
         self.ui.showNeighboringcheckBoxMultiple.clicked.connect(self.updateParameterNodeFromGUI)
 
+        self.ui.showNeighboringcheckBoxMultiple.clicked.connect(self.onSegmentSelectionChangedMultiple)
         self.ui.segmentationTableWidget.cellClicked.connect(self.onSegmentSelectionChangedMultiple)
 
         self.ui.nextButton_comparison.clicked.connect(self.onNextButtonMultiple)
@@ -431,8 +432,8 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         headers = [
             ( self._icons['header_visible'], ""),
             (self._icons['header_color'], ""),  
-            (None, "Name"),  
-            (None, "Number of segmentations") 
+            (None, "Segment name"),  
+            (None, "Models containing segments") 
         ]
         #Set colum header
         for col, (icon, text) in enumerate(headers):
@@ -696,6 +697,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             self.ui.label_or.setEnabled(False)
             self.ui.SegmentationsCheckableComboBox.setEnabled(False)
             self.ui.openModelButton.setEnabled(False)
+            self.ui.lableSegdicomRef.setEnabled(False)
             return
 
         #Write segmentation names for the selected volume in the segmentation combo box
@@ -724,6 +726,9 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.ui.ModelCheckableComboBox.setEnabled(True)
         self.ui.openModelButton.setEnabled(True)
         self.ui.addSegmentationsButton.setEnabled(True)
+        self.ui.lableSegdicomRef.setEnabled(True)
+        referencedSegmentations = self.getAssociatedSegmentationFileNumber()
+        self.ui.lableSegdicomRef.setText(str(referencedSegmentations)+ " DICOM SEG series referencing this volume found")
         #Diables the Options and the Segment by Segment comparison
         for btn in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
@@ -740,6 +745,38 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             seriesUID = slicer.dicomDatabase.seriesForFile(filePath)
             self.logic.loadDicomSeries(seriesUID)
             self.changeSegmentationFiles()
+
+    def getAssociatedSegmentationFileNumber(self):
+        volumeNode = self.ui.volumeNodeComboBox.currentNode()
+        instanceUIDsString = volumeNode.GetAttribute("DICOM.instanceUIDs")
+
+        if instanceUIDsString:
+            firstInstanceUID = instanceUIDsString.split()[0]
+            filePath = slicer.dicomDatabase.fileForInstance(firstInstanceUID)
+            seriesUID = slicer.dicomDatabase.seriesForFile(filePath)
+            dicom_database = slicer.dicomDatabase
+            if not dicom_database:
+                return
+            
+            series_files = dicom_database.filesForSeries(seriesUID)
+            if not series_files:
+                return
+            
+            study_uid = dicom_database.studyForSeries(seriesUID)
+            if not study_uid:
+                return
+            
+            segmentation_series = [
+            uid for uid in dicom_database.seriesForStudy(study_uid)
+            if uid != seriesUID
+            and dicom_database.fieldForSeries("Modality", uid) == "SEG"
+            and self.logic.getReferencedCtSeries(uid) == seriesUID
+            ]
+
+            return len(segmentation_series)
+        return 0
+
+        
 
     def changeSegmentationFiles(self):
         self._buildSegmentationVolumeMap()
@@ -1713,18 +1750,28 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
     
     #Load all Segmentation files for chosen Volume
     def getReferencedCtSeries(self, segmentation_uid):
+        """
+        Returns the SeriesInstanceUID of the referenced CT given a DICOM Seg File.
+        :param segmentation_uid: SeriesInstanceUID of a segmentation:
+
+        :return String: SeriesInstanceUID of the referecned CT
+        """
         dicom_database = slicer.dicomDatabase
         series_files = dicom_database.filesForSeries(segmentation_uid)
         if not series_files:
             return None
         
         try:
-            ds = pydicom.dcmread(series_files[0], stop_before_pixels = True)
+            ds = pydicom.dcmread(series_files[0], stop_before_pixels = True, specific_tags = ["ReferencedSeriesSequence"])
             return ds.ReferencedSeriesSequence[0].SeriesInstanceUID
         except Exception as e:
+            print(e)
             return None
         
     def getSegmentationSopInstanceUID(self, series_uid):
+        """
+        Returns all Segmentation Instance UIDs that belong to a Series 
+        """
         dicom_database = slicer.dicomDatabase
         files = dicom_database.filesForSeries(series_uid)
         if not files:
@@ -1737,6 +1784,9 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
 
 
     def loadDicomSeries(self,series_instance_uid):
+        """
+        Loads all DICOM SEG Files into 3D Slicer that reference the given Series Instance UID of a volume (CT)
+        """
         dicom_database = slicer.dicomDatabase
         if not dicom_database:
             return
@@ -1755,6 +1805,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         and dicom_database.fieldForSeries("Modality", uid) == "SEG"
         and self.getReferencedCtSeries(uid) == series_instance_uid
         ]
+        print(segmentation_series)
 
         if not segmentation_series:
             return
