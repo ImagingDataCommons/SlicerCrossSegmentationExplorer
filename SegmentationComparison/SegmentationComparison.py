@@ -1414,7 +1414,8 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         """Called when the logic class is instantiated. Can be used for initializing member variables."""
         ScriptedLoadableModuleLogic.__init__(self)
         self.segmentBoundingBoxes = {}
-        # Cache for referenced CT series UIDs to avoid repeated DICOM file reads
+        # Cache for referenced CT series UIDs to avoid repeated DICOM file reads.
+        # Maps segmentation series UID -> referenced CT series UID
         self._referencedSeriesCache = {}
 
     def setDefaultParameters(self, parameterNode):
