@@ -1414,6 +1414,8 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         """Called when the logic class is instantiated. Can be used for initializing member variables."""
         ScriptedLoadableModuleLogic.__init__(self)
         self.segmentBoundingBoxes = {}
+        # Cache for referenced CT series UIDs to avoid repeated DICOM file reads
+        self._referencedSeriesCache = {}
 
     def setDefaultParameters(self, parameterNode):
         """
@@ -1748,24 +1750,42 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
     
         return layout_xml
     
+    def clearReferencedSeriesCache(self):
+        """
+        Clears the cache of referenced CT series UIDs.
+        Should be called when the DICOM database is updated or modified.
+        """
+        self._referencedSeriesCache.clear()
+    
     #Load all Segmentation files for chosen Volume
     def getReferencedCtSeries(self, segmentation_uid):
         """
         Returns the SeriesInstanceUID of the referenced CT given a DICOM Seg File.
+        Uses caching to avoid repeated DICOM file reads for the same series.
         :param segmentation_uid: SeriesInstanceUID of a segmentation:
 
         :return String: SeriesInstanceUID of the referecned CT
         """
+        # Check cache first
+        if segmentation_uid in self._referencedSeriesCache:
+            return self._referencedSeriesCache[segmentation_uid]
+        
         dicom_database = slicer.dicomDatabase
         series_files = dicom_database.filesForSeries(segmentation_uid)
         if not series_files:
+            self._referencedSeriesCache[segmentation_uid] = None
             return None
         
         try:
             ds = pydicom.dcmread(series_files[0], stop_before_pixels = True, specific_tags = ["ReferencedSeriesSequence"])
-            return ds.ReferencedSeriesSequence[0].SeriesInstanceUID
+            referenced_series = ds.ReferencedSeriesSequence[0].SeriesInstanceUID
+            # Cache the result
+            self._referencedSeriesCache[segmentation_uid] = referenced_series
+            return referenced_series
         except Exception as e:
             print(e)
+            # Cache None for failed reads to avoid repeated failures
+            self._referencedSeriesCache[segmentation_uid] = None
             return None
         
     def getSegmentationSopInstanceUID(self, series_uid):
