@@ -73,7 +73,7 @@ The Segment-wise comparison across models panel enables detailed, structure-wise
 *Example of the "Ribs" segmentation group: all segments with names containing keywords like "rib" are automatically grouped and displayed in the views when selected.*
 ![Ribs](https://github.com/user-attachments/assets/ed991c4a-f05a-43e5-b474-ac36acab640c)
 
-*Structure-wise comparison of a single rib segment with neighboring segments shown semi-transparent. Neighboring structures are computed separately for each segmentation or model, based on the available segmentations. As each segmentation may contain a different set of anatomical structures, neighboring segments can vary. For example, one model might display adjacent ribs, while another includes nearby organs such as the lungs.*  
+*Structure-wise comparison of a single rib segment with neighboring segments shown semi-transparent. Neighboring structures are computed separately for each segmentation or model, based on the available segmentations. As each segmentation may contain a different set of anatomical structures, neighboring segments can vary — for example, one model might display adjacent ribs, while another includes nearby organs such as the lungs.*  
 ![SemiTransparent](https://github.com/user-attachments/assets/b7ee7c8e-76e1-4d37-bceb-4a77fe51cbc9)
 
  
