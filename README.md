@@ -49,7 +49,7 @@ https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
 
 ---
 
-Below the main controls, two collapsible sections — **Options** and **Segment-wise comparison across models**—provide additional functionality to support review and analysis workflows:
+Below the main controls, two collapsible sections — **Options** and **Segment-wise comparison across models** — provide additional functionality to support review and analysis workflows:
 
 #### Options
 Options allows you to adjust how the segmentations in the 2D views are displayed and how views behave:
