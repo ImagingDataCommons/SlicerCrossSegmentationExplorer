@@ -57,7 +57,7 @@ Options allows you to adjust how the segmentations in the 2D views are displayed
 - *Change Segmentation Representation to Outline:* Switches the segmentation display from filled regions to outlines.
 
 #### Segment-wise comparison across models
-The Segment-wise comparison across models panel enables detailed, structure-wise review across multiple segmentations or segmentation models.
+The Segment-wise comparison across models panel enables detailed,  review across the individual segments available in the loaded segmentations.
 
 **Key Features:**
 - *Select Segmentation Group:* Choose an anatomical group (e.g., "Ribs") or select "All" to include all available segments. The table will display only the segments that
