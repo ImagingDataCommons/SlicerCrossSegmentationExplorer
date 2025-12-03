@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
 
 
 
-3. Select the volume you want to review - After selecting the volume, the module lists the amount of associated segmentations and provides the option to load them. Segmentations that are already loaded are detected and not loaded a second time
+3. Select the volume you want to review — After selecting the volume, the module lists the amount of associated segmentations and provides the option to load them. Segmentations that are already loaded are detected and not loaded a second time
 4. Select one or more segmentations (The dropdown menu displays all loaded segmentations associated with the selected volume) OR select one or more segmentation models to initialize individual 3D views for each selected item
    - Segmentation models group one or more segmentations into a single model representation. This is useful when AI-based segmentation methods produce multiple output files.
    - Segmentations are automatically assigned to models based on keywords found in their names.
