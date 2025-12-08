@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-set(MODULE_NAME Segmentation Comparison)
+set(MODULE_NAME CrossSegmentationExplorer)
 
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS

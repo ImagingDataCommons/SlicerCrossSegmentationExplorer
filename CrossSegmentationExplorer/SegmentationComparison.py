@@ -45,7 +45,7 @@ class SegmentationComparison(ScriptedLoadableModule):
 
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "Segmentation Comparison" 
+        self.parent.title = "CrossSegmentationExplorer" 
         self.parent.categories = ["Segmentation"]
         self.parent.dependencies = [] 
         self.parent.contributors = ["Csaba Pinter (EBATINCA)", "Lena Giebeler (RWTH Aachen)"] 
@@ -115,8 +115,6 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
-        
-        #Connections for the Segmentation Comparison part of the Module
         #Dialog for the Segmentation Model Keywords
         self.segModelDialog = slicer.util.loadUI(self.resourcePath('UI/SegModelsDialog.ui'))
         self.dialogUi = slicer.util.childWidgetVariables(self.segModelDialog)
@@ -253,7 +251,6 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         # Make sure GUI changes do not call updateParameterNodeFromGUI (it could cause infinite loop)
         self._updatingGUIFromParameterNode = True
 
-        #Set Selected Segmentation Node in Segmentation Verification and Selected Volume Node in Segmentation Comparison
         self.ui.volumeNodeComboBox.setCurrentNode(self._parameterNode.GetNodeReference("CurrentVolumeNode"))
 
         #Update all Checkboxes based on the Value saved in the parameter Node
@@ -488,7 +485,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self._parameterNode.EndModify(wasModified)
 
 
-    #Function used in the Segmentation Comparison Collapsible Button
+    #Function used in the Collapsible Button
 
     def _buildSegmentationVolumeMap(self, caller=None, event=None):
         """
@@ -667,7 +664,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
                 table.removeRow(last)
 
     
-    #Function used in the Segmentation Comparison Collapsible Button main Window
+    #Function used in the Collapsible Button main Window
 
     def onVolumeChanged(self):
         """
@@ -959,7 +956,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         """
         Enables Disables the Tools based on the selected layout selection (twoD and threeD)
         """
-        #Enable/Disable Collapsible Buttons (Options and Segmentation Comparison)
+        #Enable/Disable Collapsible Buttons (Options)
         for btn in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
             btn.setEnabled(threeD or twoD)
@@ -1496,8 +1493,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         '''
         Initialize Bounding Boxes for each loaded Segmentation 
         '''
-        #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node (Segmentation Comparison)
-        #Otherwise calculate Bounding Boxes for the CurrentSegmentationNode in the parameter Node (Segmentation Verification)
+        #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node
         if not parameterNode:
             if segNode is not None:
                 segmentationNode = segNode
@@ -1524,8 +1520,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         Shows segment with segment ID in the corresponding view
         Shows neighboring segments semi transparent based on the bounding boxes when checkbox is clicked
         '''
-        #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node (Segmentation Comparison)
-        #Otherwise calculate Bounding Boxes for the CurrentSegmentationNode in the parameter Node (Segmentation Verification)
+        #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node
         if segNode is not None:
             segmentationNode = segNode
             showNeighbors = parameterNode.GetParameter("ShowNeighborsMultiple") == 'True'
