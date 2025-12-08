@@ -2,6 +2,20 @@
 
 Cross Segmentation Explorer is a 3D Slicer extension for the visual inspection and comparison of multiple segmentations on the same volume. The extension is designed for CT volumes and segmentations in DICOM SEG format.
 
+## Prepare Your Environment: How to Set Up 3DSlicer
+1. Download the latest stable build of 3D Slicer from https://download.slicer.org and install it.
+2. Open the Extension Manager by clicking “Install Extensions” on the left side of the welcome screen, or by clicking the blue button with the “E” and puzzle-piece icon in the toolbar.
+<img width="1661" height="710" alt="SlicerWelcomeLayout" src="https://github.com/user-attachments/assets/a78082ad-52fc-4b2c-8d77-2927335a40e3" />
+
+3. Install the “QuantitativeReporting” extension. This will automatically install the DCMQI dependency as well. Restart 3D Slicer after the installation.
+4. Clone this Git repository https://github.com/ImagingDataCommons/CrossSegmentationExplorer.git to your local machine.
+5. After restarting Slicer, click the “Customize Slicer” icon (see Screenshot above).
+6. Open the “Modules” tab, and on the right side under “Additional module paths,” click the arrow button with the two arrowheads and select “Add.”
+7. Navigate to the cloned CrossSegmentationExplorer repository and select the subfolder "CrossSegmentationExplorer" that contains the CrossSegmentationExplorer module, then click “Open.”
+8. Restart 3D Slicer again.
+9. After the restart, the CrossSegmentationExplorer extension should appear in the module drop-down menu under “Segmentation.”
+<img width="1798" height="1039" alt="ModuleDropDown" src="https://github.com/user-attachments/assets/44964b42-678b-41a2-9641-10215bd65dbc" />
+
 
 ## How to use
 
