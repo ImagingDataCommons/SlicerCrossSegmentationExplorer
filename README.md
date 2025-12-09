@@ -56,22 +56,25 @@ https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
 ## Segmentation Visualization
 1. Select the volume you want to review. After selecting the volume, the module lists the number of associated segmentations and provides the option to load them. Segmentations that are already loaded are detected and not reloaded.
 
-4. Select one or more segmentations (The dropdown menu displays all loaded segmentations associated with the selected volume) OR select one or more segmentation models to initialize individual 3D views for each selected item
-   - Segmentation models group one or more segmentations into a single model representation. This is useful when AI-based segmentation methods produce multiple output files.
-   - Segmentations are automatically assigned to models based on keywords found in their names.
+⚠️ **Known Performance Problems:** Selecting a volume takes very long at the moment. This delay is caused by the computation of the number of associated DICOM SEG segmentations, which is currently slow. We are aware of this issue. If needed, you can temporarily disable this by commenting out the lines 727 and 728 in the module source code:
+
+```python
+# referencedSegmentations = self.getAssociatedSegmentationFileNumber()
+# self.ui.lableSegdicomRef.setText(str(referencedSegmentations) + " DICOM SEG series referencing this volume found")
+```
+
+2. Select one or more segmentation files OR segmentation models to automatically display three orthogonal 2D views (axial, sagittal, and coronal) for each selected item
+   - The first dropdown menu displays all loaded segmentations associated with the selected volume and allows you to select the segmentation file
+   - The second dropdown menu is to select segmentation models. Segmentation models group one or more segmentations into a single model representation. This is useful when AI-based segmentation methods produce multiple output files.Segmentations are automatically assigned to models based on keywords found in their series description.
    - Models and associated keywords can be created, modified, or deleted by clicking the plus icon next to the segmentation dropdown. This opens a configuration table, where models
      can be edited or added. Keywords used for matching should be entered as comma-separated values.
-     ![ModelKeywordTable](https://github.com/user-attachments/assets/2cd2b0d4-b198-4de8-b701-b89f93063287)
-
-     *Add, delete, or modify segmentation model names and associated keywords in the model configuration pop-up table*
+     <img width="1700" height="686" alt="SegmentationModelPopUpTable" src="https://github.com/user-attachments/assets/6f5e133c-edc2-4b2e-be66-d9902ead92bd" />
      
-5. OPTIONAL: Modify the Layout:
-   - By default, 3D views are enabled when segmentations are loaded.
-   - In the Instantiate Views section, you can also enable 2D views. If selected, three orthogonal 2D views (axial, sagittal, coronal) will be created for each selected segmentation
-     or segmentation model, displaying the CT volume overlaid with the corresponding segmentation.
-   - Each view type (2D or 3D) can be toggled on or off independently.
-     ⚠️ At least one view must be enabled to visualize the data.
-   - Additionally, activating the "Instantiate Vertical Layout" checkbox arranges the 2D views in a vertical layout instead of the default horizontal layout.
+3. *OPTIONAL:* **Modify the Layout**:
+   - By default, three orthogonal 2D views (axial, sagittal, coronal) will be created for each selected segmentation or segmentation model, displaying the CT volume overlaid with the corresponding segmentation
+   - In the “Enable 2D & 3D Views” section, you can also enable 3D views. When selected, one 3D view is created for each segmentation file or model, with the corresponding segmentations rendered in that view
+   - Each view type (2D or 3D) can be toggled on or off independently. ⚠️ At least one view must be enabled to visualize the data.
+   - Additionally, selecting the "Vertical/horizontal Layout" checkbox arranges the 2D views in a vertical layout instead of the default horizontal layout.
      
      *Vertical Layout*
      ![Vertical Layout](https://github.com/user-attachments/assets/8e605484-964b-4329-a7e1-f36ba84d63d5)
