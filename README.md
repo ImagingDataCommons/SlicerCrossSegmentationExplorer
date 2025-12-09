@@ -1,8 +1,11 @@
 # CrossSegmentationExplorer
 
-Cross Segmentation Explorer is a 3D Slicer extension for the visual inspection and comparison of multiple segmentations on the same volume. The extension is designed for CT volumes and segmentations in DICOM SEG format.
+Cross Segmentation Explorer is a 3D Slicer extension for the visual inspection and comparison of multiple segmentations on the same volume. The extension is designed for CT volumes and segmentations in DICOM SEG format. This extension has been tested exclusively on CT volumes.
 
-## Prepare Your Environment: How to Set Up 3DSlicer
+---
+
+# Getting Started 
+## 1. Prepare Your Environment: How to Set Up 3DSlicer
 1. Download the latest stable build of 3D Slicer from https://download.slicer.org and install it.
 2. Open the Extension Manager by clicking “Install Extensions” on the left side of the welcome screen, or by clicking the blue button with the “E” and puzzle-piece icon in the toolbar.
 <img width="1661" height="710" alt="SlicerWelcomeLayout" src="https://github.com/user-attachments/assets/a78082ad-52fc-4b2c-8d77-2927335a40e3" />
@@ -17,27 +20,42 @@ Cross Segmentation Explorer is a 3D Slicer extension for the visual inspection a
 <img width="1798" height="1039" alt="ModuleDropDown" src="https://github.com/user-attachments/assets/44964b42-678b-41a2-9641-10215bd65dbc" />
 
 
-## How to use
+## 2. Access Your Data: How and Where to Download Imaging Datasets
+⚠️ **Supported Data Formats:** This module currently works only with DICOM volumes and DICOM SEG segmentation files. Other file formats are not supported at the moment.
+### Using our published Zenodo Dataset (Recommended)
+Download the dataset released with the paper “In search of truth: Evaluating concordance of AI-based anatomy segmentation models” from Zenodo (DOI: 10.5281/zenodo.17860591).
+This dataset includes 18 CT volumes from the NLST Dataset and corresponding segmentations suitable for immediate use with the module.
+### Downloading Data from the Imaging Data Commons (IDC)
+- Through the IDC web portal: https://portal.imaging.datacommons.cancer.gov
+- Via the SlicerIDCBrowser extension by pasting a Study Instance UID into the study field (see [forum topic](https://discourse.slicer.org/t/sliceridcbrowser-extension-released/32279/2))
+- Programmatically using:
+  ```bash
+  pip install --upgrade idc-index
+  idc download-from-selection --study-instance-uid <UID> --download-dir .
+  
+### Using Your Own Data
+You can also use your own imaging studies with this module. If no segmentation is available, you can generate one directly inside Slicer using AI-based segmentation extensions such as **SlicerMOOSE**, **MONAIAuto3DSeg**, or **TotalSegmentator**. These extensions produce DICOM SEG files that are compatible with this module.
 
-1. Achieve a new AI segmentation (for example by using the [TotalSegmentator](https://github.com/lassoan/SlicerTotalSegmentator) or [MONAIAuto3DSeg](https://github.com/lassoan/SlicerMONAIAuto3DSeg) extension)
-    - As an alternative you can download a sample dataset from [Imaging Data Commons](https://github.com/ImagingDataCommons/idc-index):
-        - Programatically
-            - `pip install --upgrade idc-index`
-            - `idc download-from-selection --study-instance-uid 1.2.840.113654.2.55.119867199987299072242360817545965112631 --download-dir .`
-        - You can also download it using `SlicerIDCBrowser` by pasting the UID into the study field (see [forum topic](https://discourse.slicer.org/t/sliceridcbrowser-extension-released/32279/2))
-        - Or the [IDC portal on the web](https://portal.imaging.datacommons.cancer.gov/explore/)
-    - Load the downloaded data as DICOM (you will need the DCMQI extension but you have it if you already installed the IDCBrowser)
-2. Open the CrossSegmentationExplorer module
+## 3. Importing Your DICOM Data: How to Load Studies into 3D Slicer
+1. On the 3D Slicer Welcome screen, click “Add DICOM Data” to open the DICOM module.
+<img width="1618" height="710" alt="SlicerWelcomeScreenAddDicom" src="https://github.com/user-attachments/assets/bd50efe9-49e2-4e7a-ae86-3f5072e2b3b4" />
+
+2. In the DICOM module, click “Import DICOM Files”.
+<img width="1618" height="710" alt="DICOMDatabase" src="https://github.com/user-attachments/assets/b0d80092-a50d-4c01-a604-09469dedc528" />
+
+3. Select the top-level folder that contains all DICOM files for your dataset (Slicer will automatically detect and organize all subfolders). Wait for Slicer to import the data. Depending on the number and size of the files, this may take some time.
+4. After the import is complete, use the DICOM browser to load all data for a patient, only a specific study,or individual series/files. Once the intended data is selected, click “Load” to bring it into the Slicer workspace.
 
 ---
 
-## CrossSegmentationExplorer Module
+# CrossSegmentationExplorer Module
 
 https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
 
 
+## Segmentation Visualization
+1. Select the volume you want to review. After selecting the volume, the module lists the number of associated segmentations and provides the option to load them. Segmentations that are already loaded are detected and not reloaded.
 
-3. Select the volume you want to review — After selecting the volume, the module lists the number of associated segmentations and provides the option to load them. Segmentations that are already loaded are detected and not reloaded.
 4. Select one or more segmentations (The dropdown menu displays all loaded segmentations associated with the selected volume) OR select one or more segmentation models to initialize individual 3D views for each selected item
    - Segmentation models group one or more segmentations into a single model representation. This is useful when AI-based segmentation methods produce multiple output files.
    - Segmentations are automatically assigned to models based on keywords found in their names.
