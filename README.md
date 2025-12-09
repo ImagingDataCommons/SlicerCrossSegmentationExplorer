@@ -77,12 +77,11 @@ https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
    - Additionally, selecting the "Vertical/horizontal Layout" checkbox arranges the 2D views in a vertical layout instead of the default horizontal layout.
      
      *Vertical Layout*
-     ![Vertical Layout](https://github.com/user-attachments/assets/8e605484-964b-4329-a7e1-f36ba84d63d5)
+     <img width="1104" height="596" alt="VerticalLayout" src="https://github.com/user-attachments/assets/570417b8-4e15-4ae1-8be8-336a120f2ecb" />
+
      *Horizontal Layout*
-     ![Horizontal Layout](https://github.com/user-attachments/assets/eb2d5a5f-5ded-415b-8ae1-6ec926d0b5f1)
+     <img width="1103" height="596" alt="HorizontalLayout" src="https://github.com/user-attachments/assets/ad3b9c8c-8880-4cbe-98d3-1364aad86845" />
 
-
----
 
 Below the main controls, two collapsible sections — **Options** and **Segment-wise comparison across models** — provide additional functionality to support review and analysis workflows:
 
@@ -91,7 +90,7 @@ Options allows you to adjust how the segmentations in the 2D views are displayed
 - *Link Views:* Synchronize camera movements across all active 3D or 2D views.
 - *Change Segmentation Representation to Outline:* Switches the segmentation display from filled regions to outlines.
 
-#### Segment-wise comparison across models
+## Segment-wise comparison across models
 The Segment-wise comparison across models panel enables detailed,  review across the individual segments available in the loaded segmentations.
 
 **Key Features:**
@@ -106,9 +105,9 @@ The Segment-wise comparison across models panel enables detailed,  review across
 - *Show Neighboring Segments:* When the "Show neighboring segments semi-transparent" option is enabled, spatially adjacent structures are shown in semi-transparent mode.
 
 *Example of the "Ribs" segmentation group: all segments with names containing keywords like "rib" are automatically grouped and displayed in the views when selected.*
-![Ribs](https://github.com/user-attachments/assets/ed991c4a-f05a-43e5-b474-ac36acab640c)
+<img width="1816" height="861" alt="RibsGroup" src="https://github.com/user-attachments/assets/60150f16-afd7-406e-a7d9-c013932cb310" />
+
 
 *Structure-wise comparison of a single rib segment with neighboring segments shown semi-transparent. Neighboring structures are computed separately for each segmentation or model, based on the available segmentations. As each segmentation may contain a different set of anatomical structures, neighboring segments can vary — for example, one model might display adjacent ribs, while another includes nearby organs such as the lungs.*  
-![SemiTransparent](https://github.com/user-attachments/assets/b7ee7c8e-76e1-4d37-bceb-4a77fe51cbc9)
+ <img width="1816" height="861" alt="NeighboringSemiTransparent" src="https://github.com/user-attachments/assets/8d9ffb0e-b92f-4275-a18e-db86b23fa0e6" />
 
- 
