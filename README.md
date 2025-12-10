@@ -23,7 +23,7 @@ Cross Segmentation Explorer is a 3D Slicer extension for the visual inspection a
 ## 2. Access Your Data: How and Where to Download Imaging Datasets
 ⚠️ **Supported Data Formats:** This module currently works only with DICOM volumes and DICOM SEG segmentation files. Other file formats are not supported at the moment.
 ### Using our published Zenodo Dataset (Recommended)
-Download the dataset released with the paper “In search of truth: Evaluating concordance of AI-based anatomy segmentation models” from Zenodo (DOI: 10.5281/zenodo.17860591).
+Download the dataset released with the paper “In search of truth: Evaluating concordance of AI-based anatomy segmentation models” from Zenodo (https://doi.org/10.5281/zenodo.17401359).
 This dataset includes 18 CT volumes from the NLST Dataset and corresponding segmentations suitable for immediate use with the module.
 ### Downloading Data from the Imaging Data Commons (IDC)
 - Through the IDC web portal: https://portal.imaging.datacommons.cancer.gov
@@ -50,7 +50,8 @@ You can also use your own imaging studies with this module. If no segmentation i
 
 # CrossSegmentationExplorer Module
 
-https://github.com/user-attachments/assets/7f8a19b6-a4cc-49d2-b099-acd6008a5ced
+https://github.com/user-attachments/assets/58fa7e4f-16bc-4330-8721-963117fb513e
+
 
 
 ## Segmentation Visualization
