@@ -116,27 +116,27 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
         #Dialog for the Segmentation Model Keywords
-        self.segModelDialog = slicer.util.loadUI(self.resourcePath('UI/SegModelsDialog.ui'))
-        self.dialogUi = slicer.util.childWidgetVariables(self.segModelDialog)
-        self.segModelDialog.hide()
+        self.segmentationModelDialog = slicer.util.loadUI(self.resourcePath('UI/SegmentationModelsDialog.ui'))
+        self.dialogUi = slicer.util.childWidgetVariables(self.segmentationModelDialog)
+        self.segmentationModelDialog.hide()
 
-        self.ui.openModelButton.clicked.connect(self.showSegModelDialog)
+        self.ui.openModelButton.clicked.connect(self.showsegmentationModelDialog)
         self.ui.openModelButton.setToolTip("Group multiple segmentation files into one model for joint display. Models include segmentation files whose series descriptions contain keywords associated with that model. Click '+' to add or modify models and their keywords.")
-        self.dialogUi.okTableButton.clicked.connect(lambda checked=False: self.segModelDialog.accept())
+        self.dialogUi.okTableButton.clicked.connect(lambda checked=False: self.segmentationModelDialog.accept())
 
         self.dialogUi.addRowButton.clicked.connect(self.onAddRow)
         self.dialogUi.deleteRowButton.clicked.connect(self.onDeleteRow)
         self.dialogUi.modelNametableWidget.itemChanged.connect(self.onModelTableItemChanged)
 
         #Dialog for the Segmentaion Goup Keywords
-        self.segGroupDialog = slicer.util.loadUI(self.resourcePath('UI/SegGroupsDialog.ui'))
-        self.dialogGroupUi = slicer.util.childWidgetVariables(self.segGroupDialog)
-        self.segGroupDialog.hide()
+        self.segmentationGroupDialog = slicer.util.loadUI(self.resourcePath('UI/SegmentationGroupsDialog.ui'))
+        self.dialogGroupUi = slicer.util.childWidgetVariables(self.segmentationGroupDialog)
+        self.segmentationGroupDialog.hide()
 
-        self.ui.openGroupButton.clicked.connect(self.showSegGroupDialog)
+        self.ui.openGroupButton.clicked.connect(self.showsegmentationGroupDialog)
         self.ui.openGroupButton.setToolTip("Segmentation groups include segments whose names contain keywords associated with that group. Click '+' to add or modify segmentation groups and their keywords.")
         self.ui.lableSegmentationGroup.setToolTip("A collection of segments automatically grouped based on keywords (e.g., 'rib', 'lung')")
-        self.dialogGroupUi.okTableButton.clicked.connect(lambda checked=False: self.segGroupDialog.accept())
+        self.dialogGroupUi.okTableButton.clicked.connect(lambda checked=False: self.segmentationGroupDialog.accept())
 
         self.dialogGroupUi.addGrouptable.itemChanged.connect(self.onGroupTableItemChanged)
         self.dialogGroupUi.addRowButton.clicked.connect(self.onAddRowGroup)
@@ -255,22 +255,22 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         #Update all Checkboxes based on the Value saved in the parameter Node
         checkboxMapping = {
-            "ShowNeighborsMultiple": self.ui.showNeighboringcheckBoxMultiple,
+            "ShowNeighbors": self.ui.showNeighboringcheckBoxMultiple,
             "Show3D":              self.ui.threedCheckbox,
             "Show2D":              self.ui.twodCheckbox,
             "3DLink":              self.ui.link3DViewCheckBox,
             "2DLink":              self.ui.link2DViewCheckBox,
-            "OutlineRep":          self.ui.outlineCheckBox,
+            "OutlineRepresentation":          self.ui.outlineCheckBox,
         }
         for key, widget in checkboxMapping.items():
-            val = self._parameterNode.GetParameter(key)
-            if val is not None:
-                widget.setChecked(val == "True")
+            value = self._parameterNode.GetParameter(key)
+            if value is not None:
+                widget.setChecked(value == "True")
 
         #Update Radiobuttons for vertical/horizontal layout based on the Value saved in the parameter Node
-        val_vertical = self._parameterNode.GetParameter("VerticalLayout")
-        self.ui.verticalButton.setChecked(val_vertical == "True")
-        self.ui.horizontalButton.setChecked(val_vertical == "False")
+        value_vertical = self._parameterNode.GetParameter("VerticalLayout")
+        self.ui.verticalButton.setChecked(value_vertical == "True")
+        self.ui.horizontalButton.setChecked(value_vertical == "False")
 
         
 
@@ -380,7 +380,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         combo.setCurrentIndex(idx if idx >= 0 else 0)
 
         #Initiliaze the Layout of the Segmentation Table in the Segment by Segment Collapsible Button
-        self.configure_table()
+        self.configureTable()
         #Based on the Segmentation/Model Selection and the Checkboxes enable the options
         self.enableOptions((self._parameterNode.GetParameter("Show3D")), (self._parameterNode.GetParameter("Show2D")))
         #Based on the Selected Group update the showed Segments in the Group and the Segment Table 
@@ -417,7 +417,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         if not tableName or not found:
             self.onSegmentGroupChanged()
         
-    def configure_table(self):
+    def configureTable(self):
         """
         Update/Setup Table Layout -> Load Icons etc.
         """
@@ -433,15 +433,15 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             (None, "Models containing segments") 
         ]
         #Set colum header
-        for col, (icon, text) in enumerate(headers):
+        for column, (icon, text) in enumerate(headers):
             item = qt.QTableWidgetItem(icon, text) if icon else qt.QTableWidgetItem(text)
-            table.setHorizontalHeaderItem(col, item)
-        hdr = table.horizontalHeader()
+            table.setHorizontalHeaderItem(column, item)
+        header = table.horizontalHeader()
         for c in (0, 1, 3):
-            hdr.setSectionResizeMode(c, qt.QHeaderView.ResizeToContents)
-        hdr.setSectionResizeMode(2, qt.QHeaderView.Stretch)
+            header.setSectionResizeMode(c, qt.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, qt.QHeaderView.Stretch)
         table.setHorizontalScrollBarPolicy(qt.Qt.ScrollBarAlwaysOff)
-        hdr.setVisible(True)
+        header.setVisible(True)
         table.setSortingEnabled(True)
     
 
@@ -458,7 +458,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         self._parameterNode.SetNodeReferenceID("CurrentVolumeNode", self.ui.volumeNodeComboBox.currentNodeID)
 
-        self._parameterNode.SetParameter("ShowNeighborsMultiple", 'True' if self.ui.showNeighboringcheckBoxMultiple.checked else 'False')
+        self._parameterNode.SetParameter("ShowNeighbors", 'True' if self.ui.showNeighboringcheckBoxMultiple.checked else 'False')
 
         selectedIds = [ index.data() for index in self.ui.ModelCheckableComboBox.checkedIndexes() ]
         self._parameterNode.SetParameter("ModelIDs", ",".join(selectedIds))
@@ -471,7 +471,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self._parameterNode.SetParameter("VerticalLayout", "True" if self.ui.verticalButton.checked else "False")
         self._parameterNode.SetParameter("3DLink", "True" if self.ui.link3DViewCheckBox.checked else "False")
         self._parameterNode.SetParameter("2DLink", "True" if self.ui.link2DViewCheckBox.checked else "False")
-        self._parameterNode.SetParameter("OutlineRep", "True" if self.ui.outlineCheckBox.checked else "False")
+        self._parameterNode.SetParameter("OutlineRepresentation", "True" if self.ui.outlineCheckBox.checked else "False")
         self._parameterNode.SetParameter("SelectedGroup", self.ui.segmentGroupComboBox.currentText)
         sel = self.ui.segmentationTableWidget.selectedItems()
         if not sel:
@@ -494,21 +494,21 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         First called during the set up after opening the module
         """
         self._segmentationVolumeMap.clear()
-        for seg in slicer.util.getNodesByClass('vtkMRMLSegmentationNode'):
-            volRef = seg.GetNodeReference(seg.GetReferenceImageGeometryReferenceRole())
-            if volRef:
-                self._segmentationVolumeMap.setdefault(volRef.GetID(), []).append(seg)
+        for segmentation in slicer.util.getNodesByClass('vtkMRMLSegmentationNode'):
+            volumeReference = segmentation.GetNodeReference(segmentation.GetReferenceImageGeometryReferenceRole())
+            if volumeReference:
+                self._segmentationVolumeMap.setdefault(volumeReference.GetID(), []).append(segmentation)
 
 
     #Funktions for the pop up/Dialog for the Keyword Tables
 
     #Functions for the Segmentation Model Keyword Table
-    def showSegModelDialog(self):
+    def showsegmentationModelDialog(self):
         """
         Executes the Dialog/pop up to the Segmentation Model Keyword Table
         Called on clicking the + Button next to the Combo Box
         """
-        self.segModelDialog.exec_()
+        self.segmentationModelDialog.exec_()
 
     def onModelTableItemChanged(self):
         """
@@ -573,12 +573,12 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
     
 
     #Functions for the Segmentation Group Keyword Table
-    def showSegGroupDialog(self):
+    def showsegmentationGroupDialog(self):
         """
         Executes the Dialog/pop up to the Segmentation Group Keyword Table
         Called on clicking the + Button next to the Combo Box
         """
-        self.segGroupDialog.exec_()
+        self.segmentationGroupDialog.exec_()
 
     def onGroupTableItemChanged(self):
         """
@@ -698,8 +698,8 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             return
 
         #Write segmentation names for the selected volume in the segmentation combo box
-        segs = self.get_segmentations_for_volume()
-        segNames = {seg.GetName() for seg in segs}
+        segmentations = self.getSegmentationsForVolume()
+        segNames = {seg.GetName() for seg in segmentations}
         self.ui.SegmentationsCheckableComboBox.clear()
         
         for name in sorted(segNames):
@@ -727,10 +727,10 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         referencedSegmentations = self.getAssociatedSegmentationFileNumber()
         self.ui.lableSegdicomRef.setText(str(referencedSegmentations)+ " DICOM SEG series referencing this volume found")
         #Diables the Options and the Segment by Segment comparison
-        for btn in (self.ui.OptionsCollapsibleButton,
+        for button in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
-            btn.setEnabled(False)
-            btn.collapsed = True
+            button.setEnabled(False)
+            button.collapsed = True
 
     def onLoadSegmentations(self):
         volumeNode = self.ui.volumeNodeComboBox.currentNode()
@@ -795,8 +795,8 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
                 combo.itemText(i): combo.model().item(i)
                 for i in range(combo.count)
             }
-            segs = self.get_segmentations_for_volume()
-            segNames = {seg.GetName() for seg in segs}
+            segmentations = self.getSegmentationsForVolume()
+            segNames = {seg.GetName() for seg in segmentations}
             for name in list(currentItems.keys()):
                 if name not in segNames:
                     index = combo.findText(name)
@@ -870,13 +870,13 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self._parameterNode.SetParameter("Show3D", self._parameterNode.GetParameter("Show3D") if hasSelection else "False")
         self._parameterNode.SetParameter("Show2D", "True" if hasSelection else "False")
         self._parameterNode.SetParameter("VerticalLayout", self._parameterNode.GetParameter("VerticalLayout") if hasSelection else "False")
-        self._parameterNode.SetParameter("OutlineRep", self._parameterNode.GetParameter("OutlineRep") if (self._parameterNode.GetParameter("Show2D") == "True") else "False")
+        self._parameterNode.SetParameter("OutlineRepresentation", self._parameterNode.GetParameter("OutlineRepresentation") if (self._parameterNode.GetParameter("Show2D") == "True") else "False")
         self._parameterNode.EndModify(wasModified)
     
         #Enables/Disables Collapsible Buttons dependig on hasSelection
-        for btn in (self.ui.OptionsCollapsibleButton,
+        for button in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
-            btn.setEnabled(hasSelection)
+            button.setEnabled(hasSelection)
         
         #Update Layout
         self.updateLayout()
@@ -884,7 +884,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.onLinkThreeDViewChanged()
         self.onLinkTwoDViewChanged()
 
-    def get_checked_models(self):
+    def getCheckedModels(self):
         """
         Returns selected Segmentation Model and selected Segmentation Names from checkable combo box for current/selected Volume
         """
@@ -896,7 +896,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
                 for idx in self.ui.SegmentationsCheckableComboBox.checkedIndexes()]
         return model_names + segmentation_names
 
-    def get_segmentations_for_volume(self):
+    def getSegmentationsForVolume(self):
         """
         Returns all Segmentation Nodes for current/selected Volume
         """
@@ -917,7 +917,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
         #Get Layout Parameters
-        view_names = self.get_checked_models()
+        view_names = self.getCheckedModels()
         layout_number = len(view_names)
         #get Checkboxes
         threed_enabled = self.ui.threedCheckbox.isChecked()
@@ -945,7 +945,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             layoutNode.SetViewArrangement(layoutNode.SlicerLayoutUserView)
             #Load Segmentations to views
             selectedVolume = slicer.util.getNode(self._parameterNode.GetNodeReferenceID("CurrentVolumeNode"))
-            nodeMapping = self.get_selected_segmentation_nodes()
+            nodeMapping = self.getSelectedSegmentationsNode()
             status_outline = self.ui.outlineCheckBox.isChecked()
             self.logic.assignSegmentationsToViews(threed_enabled, twod_enabled, selectedVolume, nodeMapping, status_outline)
             #Enable Segmentation Options
@@ -957,9 +957,9 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Enables Disables the Tools based on the selected layout selection (twoD and threeD)
         """
         #Enable/Disable Collapsible Buttons (Options)
-        for btn in (self.ui.OptionsCollapsibleButton,
+        for button in (self.ui.OptionsCollapsibleButton,
                     self.ui.segmentBySegmentCollapsibleButton):
-            btn.setEnabled(threeD or twoD)
+            button.setEnabled(threeD or twoD)
 
         self.ui.link3DViewCheckBox.setEnabled(threeD)
         self.ui.link2DViewCheckBox.setEnabled(twoD)
@@ -1002,9 +1002,9 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         """
         Shows only the Outline of the Segmentation in the 2D View when the checkbox is checked
         """
-        self._parameterNode.SetParameter("OutlineRep", "True" if self.ui.outlineCheckBox.isChecked() else "False")
-        segmentationsForVolume = self.get_segmentations_for_volume()
-        self.logic._set2DFillOutline((self._parameterNode.GetParameter("OutlineRep") == "True"), segmentationsForVolume)
+        self._parameterNode.SetParameter("OutlineRepresentation", "True" if self.ui.outlineCheckBox.isChecked() else "False")
+        segmentationsForVolume = self.getSegmentationsForVolume()
+        self.logic._set2DFillOutline((self._parameterNode.GetParameter("OutlineRepresentation") == "True"), segmentationsForVolume)
 
     def add_loaded_segmentations(self):
         """
@@ -1014,7 +1014,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         if not self._parameterNode:
             return
 
-        segs = self.get_segmentations_for_volume()
+        segmentations = self.getSegmentationsForVolume()
 
         #Get Segmentation Nodes for the Segmentation Combo Box
         #The Combo box contains the names of the segmentation nodes so we search for the nodes with the names of the checked elements
@@ -1023,7 +1023,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
             for idx in self.ui.SegmentationsCheckableComboBox.checkedIndexes()
         }
         segments_from_segcombo = [
-            seg for seg in segs
+            seg for seg in segmentations
             if seg.GetName() in selectedSegNames
         ]
 
@@ -1046,7 +1046,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         for model, keywords in filteredMapping.items():
             
             hits = []
-            for seg in segs:
+            for seg in segmentations:
                 name_lower = seg.GetName().lower()
                 if any(kw.lower() in name_lower for kw in keywords):
                     hits.append(seg)
@@ -1081,7 +1081,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self._parameterNode.EndModify(wasModified)
 
 
-    def get_selected_segmentation_nodes(self):
+    def getSelectedSegmentationsNode(self):
         """
         Returns dict Model: [segmentationNodesModel] containing selected Segmentation Nodes for each selected model and selected segmentation for current/selected Volume
         The key for the Segmentations is the Seg name 
@@ -1144,13 +1144,13 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Loads the Segmentation Groups in the dropdown based on the structures loaded
         Loads/Updates the Segmentation Table based on the group 
         """
-        mapping = self.get_selected_segmentation_nodes()
-        counts, info = self.logic.prepare_segmentation_data(mapping)
+        mapping = self.getSelectedSegmentationsNode()
+        counts, info = self.logic.prepareSegmentationData(mapping)
         structureNames = list(counts.keys())
         #Get selected Goup
         savedGroup = self._parameterNode.GetParameter("SelectedGroup")
         #Get possible Groups and Keywords
-        group_defs = self.logic.readMappingTable(self.dialogGroupUi.addGrouptable)
+        groupDefinitions = self.logic.readMappingTable(self.dialogGroupUi.addGrouptable)
 
         combo = self.ui.segmentGroupComboBox
         combo.blockSignals(True)
@@ -1158,35 +1158,35 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         #All is the default element that shows all segmentations and is always added
         combo.addItem("All")
 
-        if not group_defs:
+        if not groupDefinitions:
             #If there are no groups -> Select All by default
             combo.setCurrentIndex(0)
-            self._load_structures_in_table(counts, info)
+            self._loadStructuresInTable(counts, info)
             return
 
         self._segmentGroupMapping = {}
         #Check with groups are present in the current segment selection
         #Assign each structure to a group -> Each structure can only occur once in a group
         groupsPresent = set()
-        for struct in structureNames:
-            name_lower = struct.lower()
+        for structure in structureNames:
+            name_lower = structure.lower()
             assigned = False
             
-            for groupName, keywords in group_defs.items():
+            for groupName, keywords in groupDefinitions.items():
                 
                 if any(kw.lower() in name_lower for kw in keywords):
-                    self._segmentGroupMapping[struct] = groupName
+                    self._segmentGroupMapping[structure] = groupName
                     groupsPresent.add(groupName)
                     assigned = True
                     break
             
             if not assigned:
                 #All structures that don't belong to a group are placed in the other group
-                self._segmentGroupMapping[struct] = "Other"
+                self._segmentGroupMapping[structure] = "Other"
         groupsPresent.add("Other")
 
         #Add present groups to the group name combo box
-        for groupName in group_defs:
+        for groupName in groupDefinitions:
             if groupName in groupsPresent:
                 combo.addItem(groupName)
         combo.addItem("Other")
@@ -1198,14 +1198,14 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         if savedGroup != "All":
             
             filteredCounts = {
-                struct: cnt for struct, cnt in counts.items()
-                if self._segmentGroupMapping.get(struct, "Other") == savedGroup
+                structure: count for structure, count in counts.items()
+                if self._segmentGroupMapping.get(structure, "Other") == savedGroup
             }
             
             filteredInfo = { struct: info[struct] for struct in filteredCounts }
             counts, info = filteredCounts, filteredInfo
         #update table
-        self._load_structures_in_table(counts, info)
+        self._loadStructuresInTable(counts, info)
         self._changeTableSelection()
         
     def onSegmentGroupChanged(self):
@@ -1220,49 +1220,49 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         #Add new group name to the parameter node
         self._parameterNode.SetParameter("SelectedGroup", groupName)
 
-        nodeMapping = self.get_selected_segmentation_nodes()
+        nodeMapping = self.getSelectedSegmentationsNode()
         #Clear Seg Table Selection in table + parameter node
         self._parameterNode.SetParameter("VerificationTableSelection", "")
         #Add Structures that are part of the selected goup to the views
-        for segList in nodeMapping.values():
-            for segNode in segList:
-                displayNode = segNode.GetDisplayNode()
+        for segmentationList in nodeMapping.values():
+            for segmentationNode in segmentationList:
+                displayNode = segmentationNode.GetDisplayNode()
                 if not displayNode:
                     continue
                 
-                wasMod = displayNode.StartModify()
-                ids = vtk.vtkStringArray()
-                segNode.GetSegmentation().GetSegmentIDs(ids)
-                for i in range(ids.GetNumberOfValues()):
-                    sid = ids.GetValue(i)
-                    segment = segNode.GetSegmentation().GetSegment(sid)
+                wasModified = displayNode.StartModify()
+                segmentationIDs = vtk.vtkStringArray()
+                segmentationNode.GetSegmentation().GetSegmentIDs(segmentationIDs)
+                for i in range(segmentationIDs.GetNumberOfValues()):
+                    segmentationID = segmentationIDs.GetValue(i)
+                    segment = segmentationNode.GetSegmentation().GetSegment(segmentationID)
                     #Try to use Snowmed mapping in DICOM Metadata instead of name, because name can be different
                     tag = vtk.mutable('')
                     if segment.GetTag('TerminologyEntry', tag):
-                        structName = self.logic.extract_structure_name_from_terminology(tag)
+                        structureName = self.logic.extractStructureNameFromTerminology(tag)
                     else:
-                        structName = segment.GetName()
+                        structureName = segment.GetName()
                     
-                    segGroup = self._segmentGroupMapping.get(structName, "Other")
+                    segmentationGroup = self._segmentGroupMapping.get(structureName, "Other")
                     
-                    visible = (groupName == "All" or segGroup == groupName)
-                    displayNode.SetSegmentVisibility(sid, visible)
-                    displayNode.SetSegmentOpacity(sid, 1.0)
-                displayNode.EndModify(wasMod)
+                    visible = (groupName == "All" or segmentationGroup == groupName)
+                    displayNode.SetSegmentVisibility(segmentationID, visible)
+                    displayNode.SetSegmentOpacity(segmentationID, 1.0)
+                displayNode.EndModify(wasModified)
         #Update Table based on selected Group
-        counts, info = self.logic.prepare_segmentation_data(nodeMapping)
+        counts, info = self.logic.prepareSegmentationData(nodeMapping)
         if groupName != "All":
             
             filteredCounts = {
-                struct: cnt for struct, cnt in counts.items()
-                if self._segmentGroupMapping.get(struct, "Other") == groupName
+                structure: count for structure, count in counts.items()
+                if self._segmentGroupMapping.get(structure, "Other") == groupName
             }
             
-            filteredInfo = { struct: info[struct] for struct in filteredCounts }
+            filteredInfo = { structure: info[structure] for structure in filteredCounts }
             counts, info = filteredCounts, filteredInfo
-        self._load_structures_in_table(counts, info)
+        self._loadStructuresInTable(counts, info)
 
-    def _load_structures_in_table(self, counts, info):
+    def _loadStructuresInTable(self, counts, info):
         """
         Loads Structure Name, Color, Visibilty and Opacity in the Table for each Segmented Structure contained in one of the loaded segmented structures
         Amount is the number of models that contain that structure
@@ -1273,30 +1273,30 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         table.setSelectionBehavior(qt.QAbstractItemView.SelectRows)
         table.setSelectionMode(qt.QAbstractItemView.SingleSelection)
         table.verticalHeader().setVisible(False)
-        ico_v, ico_i = self._icons['visible'], self._icons['invisible']
+        iconVisible, iconInvisible = self._icons['visible'], self._icons['invisible']
         #palette = table.palette
         #base_color = palette.color(qt.QPalette.Base)
         #alt_base_color = palette.color(qt.QPalette.AlternateBase)
         #Add information to rows
-        for row, (struct, amt) in enumerate(counts.items()):
+        for row, (structure, amount) in enumerate(counts.items()):
             #Backgroundcolor (alternating)
             #bg = alt_base_color if row % 2 == 0 else base_color
-            d = info[struct]
+            data = info[structure]
             #Set Visibility and Backgroundcolor
-            itm = qt.QTableWidgetItem() 
-            itm.setIcon(ico_v if d['visibility'] else ico_i)
+            item = qt.QTableWidgetItem() 
+            item.setIcon(iconVisible if data['visibility'] else iconInvisible)
             #itm.setBackground(bg)
-            table.setItem(row, 0, itm)
+            table.setItem(row, 0, item)
             #Add Segmentation Structure color as square in the second column
-            lbl = qt.QLabel()
-            px = qt.QPixmap(16,16)
-            c = d['color']
-            px.fill(qt.QColor(*(int(v*255) for v in c)))
-            lbl.setPixmap(px)
-            lbl.setAlignment(qt.Qt.AlignCenter)
-            table.setCellWidget(row, 1, lbl)
+            label = qt.QLabel()
+            pixel = qt.QPixmap(16,16)
+            color = data['color']
+            pixel.fill(qt.QColor(*(int(v*255) for v in color)))
+            label.setPixmap(pixel)
+            label.setAlignment(qt.Qt.AlignCenter)
+            table.setCellWidget(row, 1, label)
             #Write text cells in table (structurename, amount)
-            for col, text in ((2, struct), (3, str(amt))):
+            for col, text in ((2, structure), (3, str(amount))):
                 cell = qt.QTableWidgetItem(text)
                 #cell.setBackground(bg)
                 table.setItem(row, col, cell)
@@ -1308,50 +1308,50 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         All other structures are hidden.
         """
         table = self.ui.segmentationTableWidget
-        sel = table.selectedItems()
-        if not sel:
+        selected = table.selectedItems()
+        if not selected:
             return
         
-        selected_row = sel[0].row()
+        selected_row = selected[0].row()
         #Save selected structure in parameter Node
         name = table.item(selected_row, 2).text()
         self._parameterNode.SetParameter("VerificationTableSelection", name)
 
         #Get the loaded segmentation Nodes
-        loaded_mapping = self.get_selected_segmentation_nodes()  # returns dict prefix: [segNodes]
-        seg_nodes = [seg for seg_list in loaded_mapping.values() for seg in seg_list]
+        loaded_mapping = self.getSelectedSegmentationsNode()  # returns dict prefix: [segNodes]
+        segmentationNodes = [segmentation for segmentationList in loaded_mapping.values() for segmentation in segmentationList]
         #For each Segnode search for the selected structure name
         #If selected structure is part of seg node select segment (show it in 2D und 3D View)
         #Otherwise just hide all Elements
-        for segNode in seg_nodes:
-            segs_obj = segNode.GetSegmentation()
-            ids = vtk.vtkStringArray()
-            segs_obj.GetSegmentIDs(ids)
+        for segmentationNode in segmentationNodes:
+            segmentationObjects = segmentationNode.GetSegmentation()
+            segmentationIDs = vtk.vtkStringArray()
+            segmentationObjects.GetSegmentIDs(segmentationIDs)
 
-            found_sid = None
-            for i in range(ids.GetNumberOfValues()):
-                sid = ids.GetValue(i)
-                segment = segs_obj.GetSegment(sid)
+            found_segmentationID = None
+            for i in range(segmentationIDs.GetNumberOfValues()):
+                segmentationID = segmentationIDs.GetValue(i)
+                segment = segmentationObjects.GetSegment(segmentationID)
                 tag = vtk.mutable('')
                 if segment.GetTag('TerminologyEntry', tag):
-                    struct = self.logic.extract_structure_name_from_terminology(tag)
+                    structure = self.logic.extractStructureNameFromTerminology(tag)
                 else:
-                    struct = segment.GetName()
-                if struct == name:
-                    found_sid = sid
+                    structure = segment.GetName()
+                if structure == name:
+                    found_segmentationID = segmentationID
                     break
 
-            if found_sid:
-                self.logic.selectSegment(self._parameterNode, found_sid, segNode)
+            if found_segmentationID:
+                self.logic.selectSegment(self._parameterNode, found_segmentationID, segmentationNode)
             else:
-                segNode.GetDisplayNode().SetAllSegmentsVisibility(False)
+                segmentationNode.GetDisplayNode().SetAllSegmentsVisibility(False)
 
         # Set visibility icons
-        ico_v = self._icons['visible']
-        ico_i = self._icons['invisible']
+        iconVisible = self._icons['visible']
+        iconInvisible = self._icons['invisible']
         for r in range(table.rowCount):
             item = table.item(r, 0)
-            item.setIcon(ico_v if r == selected_row else ico_i)
+            item.setIcon(iconVisible if r == selected_row else iconInvisible)
 
 
     def _onSegmentationTableSelectionChanged(self, index):
@@ -1359,10 +1359,10 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Selects an element of the table based on the given index (calls onSegmentSelectionChangedMultiple() on then new selected row)
         If the new index is out of bounds with the table it displays the SegmentGroup
         """
-        tw = self.ui.segmentationTableWidget
+        table = self.ui.segmentationTableWidget
         
-        if index < tw.rowCount and index >= 0: 
-            tw.selectRow(index)
+        if index < table.rowCount and index >= 0: 
+            table.selectRow(index)
             self.onSegmentSelectionChangedMultiple()
         else: 
             self.onSegmentGroupChanged()
@@ -1373,11 +1373,11 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Increases the Table Index by one
         Shows next Segmented Structure in all Views where the Segmentations contains the Structure
         """
-        tw = self.ui.segmentationTableWidget
-        sel = tw.selectedItems()
-        if not sel: 
+        table = self.ui.segmentationTableWidget
+        selected = table.selectedItems()
+        if not selected: 
             return
-        idx = sel[0].row() + 1
+        idx = selected[0].row() + 1
         self._onSegmentationTableSelectionChanged(idx)
 
     def onPreviousButtonMultiple(self):
@@ -1385,11 +1385,11 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         Decreases the Table Index by one
         Shows previous Segmented Structure in all Views where the Segmentations contains the Structure
         """
-        tw = self.ui.segmentationTableWidget
-        sel = tw.selectedItems()
-        if not sel: 
+        table = self.ui.segmentationTableWidget
+        selected = table.selectedItems()
+        if not selected: 
             return
-        idx = sel[0].row() - 1
+        idx = selected[0].row() - 1
         self._onSegmentationTableSelectionChanged(idx)
 
 #
@@ -1417,8 +1417,8 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         Initialize parameter node with default settings.
         """
 
-        if not parameterNode.GetParameter("ShowNeighborsMultiple"):
-            parameterNode.SetParameter("ShowNeighborsMultiple", "False")
+        if not parameterNode.GetParameter("ShowNeighbors"):
+            parameterNode.SetParameter("ShowNeighbors", "False")
 
 
     def assignSegmentationsToViews(self, threed_enabled, twod_enabled, selectedVolume, nodeMapping, status_outline):
@@ -1523,7 +1523,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node
         if segNode is not None:
             segmentationNode = segNode
-            showNeighbors = parameterNode.GetParameter("ShowNeighborsMultiple") == 'True'
+            showNeighbors = parameterNode.GetParameter("ShowNeighbors") == 'True'
 
         if not segmentationNode:
             raise ValueError("No segmentation node is selected")
@@ -1559,27 +1559,27 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         displayNode.EndModify(displayNodeWasModified)
 
     def _set3DLink(self, status):
-            lm = slicer.app.layoutManager()
-            for i in range(lm.threeDViewCount):
-                lm.threeDWidget(i).threeDView().mrmlViewNode().SetLinkedControl(status)
+            layoutManager = slicer.app.layoutManager()
+            for i in range(layoutManager.threeDViewCount):
+                layoutManager.threeDWidget(i).threeDView().mrmlViewNode().SetLinkedControl(status)
 
     def _set2DLink(self, status):
-        for comp in slicer.util.getNodesByClass("vtkMRMLSliceCompositeNode"):
-            comp.SetLinkedControl(status)
+        for compositeNode in slicer.util.getNodesByClass("vtkMRMLSliceCompositeNode"):
+            compositeNode.SetLinkedControl(status)
 
     def _set2DFillOutline(self, showOutline, segmentationsForVolume):
-        for seg in segmentationsForVolume:
-            dn = seg.GetDisplayNode()
-            if not dn:
+        for segmentation in segmentationsForVolume:
+            displayNode = segmentation.GetDisplayNode()
+            if not displayNode:
                 continue
             if showOutline:
-                dn.SetVisibility2DOutline(showOutline)
-                dn.SetVisibility2DFill(not showOutline)
+                displayNode.SetVisibility2DOutline(showOutline)
+                displayNode.SetVisibility2DFill(not showOutline)
             else:
-                dn.SetVisibility2DFill(not showOutline)
-                dn.SetVisibility2DOutline(showOutline)
-            dn.SetOpacity2DFill(0.5)
-            dn.SetOpacity2DOutline(0.5)
+                displayNode.SetVisibility2DFill(not showOutline)
+                displayNode.SetVisibility2DOutline(showOutline)
+            displayNode.SetOpacity2DFill(0.5)
+            displayNode.SetOpacity2DOutline(0.5)
 
     def setupAddTables(self, table, header):
         '''
@@ -1628,7 +1628,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
             mapping[key] = keywords
         return mapping
 
-    def extract_structure_name_from_terminology(self, terminology_string):
+    def extractStructureNameFromTerminology(self, terminology_string):
         """
         Extracts Structure Name from Metadata
         """
@@ -1638,35 +1638,35 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         main = parts[2].split('^')
         name = main[2].strip() if len(main) >= 3 else parts[2].strip()
         if len(parts) >= 4:
-            lat = parts[3].split('^')
-            if len(lat) >= 3 and lat[2].strip() not in name:
-                name += f" {lat[2].strip()}"
+            laterality = parts[3].split('^')
+            if len(laterality) >= 3 and laterality[2].strip() not in name:
+                name += f" {laterality[2].strip()}"
         return name or 'Unknown'
     
-    def prepare_segmentation_data(self, mapping):
+    def prepareSegmentationData(self, mapping):
         """
         Get Segment Names, visibility and color for each loaded Structure
         """
         counts, info = {}, {}
-        for segs in mapping.values():
-            for seg in segs:
-                dn = seg.GetDisplayNode()
-                segs_obj = seg.GetSegmentation()
-                ids = vtk.vtkStringArray()
-                segs_obj.GetSegmentIDs(ids)
-                for i in range(ids.GetNumberOfValues()):
-                    sid = ids.GetValue(i)
-                    segment = segs_obj.GetSegment(sid)
+        for segmentations in mapping.values():
+            for segmentation in segmentations:
+                displayNode = segmentation.GetDisplayNode()
+                segmentationObjects = segmentation.GetSegmentation()
+                segmentationIDs = vtk.vtkStringArray()
+                segmentationObjects.GetSegmentIDs(segmentationIDs)
+                for i in range(segmentationIDs.GetNumberOfValues()):
+                    segmentationID = segmentationIDs.GetValue(i)
+                    segment = segmentationObjects.GetSegment(segmentationID)
                     tag = vtk.mutable('')
-                    struct = (self.extract_structure_name_from_terminology(tag)
+                    structure = (self.extractStructureNameFromTerminology(tag)
                             if segment.GetTag('TerminologyEntry', tag)
                             else segment.GetName())
-                    vis = dn.GetSegmentVisibility(sid)
-                    op = dn.GetSegmentOpacity3D(sid)
+                    vis = displayNode.GetSegmentVisibility(segmentationID)
+                    op = displayNode.GetSegmentOpacity3D(segmentationID)
                     color = segment.GetColor()
-                    counts[struct] = counts.get(struct, 0) + 1
-                    if struct not in info:
-                        info[struct] = {'visibility': vis, 'opacity': op, 'color': color}
+                    counts[structure] = counts.get(structure, 0) + 1
+                    if structure not in info:
+                        info[structure] = {'visibility': vis, 'opacity': op, 'color': color}
         return counts, info
 
     def getBoundingBoxCoverage(self, firstBoundingBox, secondBoundingBox):
@@ -1757,8 +1757,8 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
             return None
         
         try:
-            ds = pydicom.dcmread(series_files[0], stop_before_pixels = True, specific_tags = ["ReferencedSeriesSequence"])
-            return ds.ReferencedSeriesSequence[0].SeriesInstanceUID
+            dataset = pydicom.dcmread(series_files[0], stop_before_pixels = True, specific_tags = ["ReferencedSeriesSequence"])
+            return dataset.ReferencedSeriesSequence[0].SeriesInstanceUID
         except Exception as e:
             print(e)
             return None
@@ -1772,8 +1772,8 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         if not files:
             return None
         try:
-            ds = pydicom.dcmread(files[0], stop_before_pixels=True)
-            return ds.SOPInstanceUID
+            dataset = pydicom.dcmread(files[0], stop_before_pixels=True)
+            return dataset.SOPInstanceUID
         except Exception:
             return None
 
@@ -1812,16 +1812,16 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
         progressDialog.setValue(0)
 
         total = len(segmentation_series)
-        for index, seg_uid in enumerate(segmentation_series):
-            sop_uid = self.getSegmentationSopInstanceUID(seg_uid)
+        for index, segmentationUID in enumerate(segmentation_series):
+            sop_uid = self.getSegmentationSopInstanceUID(segmentationUID)
             alreadyLoaded = any(
-                str(segNode.GetAttribute("DICOM.instanceUIDs")) == sop_uid
-                for segNode in slicer.util.getNodesByClass("vtkMRMLSegmentationNode")
+                str(segmentationNode.GetAttribute("DICOM.instanceUIDs")) == sop_uid
+                for segmentationNode in slicer.util.getNodesByClass("vtkMRMLSegmentationNode")
             )
             if alreadyLoaded:
                 continue
             #Add check that no segmentation is loaded twice
-            description = dicom_database.fieldForSeries("SeriesDescription", seg_uid)
+            description = dicom_database.fieldForSeries("SeriesDescription", segmentationUID)
             def progressCallback(pluginName, percent):
                 overallProgress = (index + percent / 100.0) / total * 100
                 progressDialog.setLabelText(f"Loading {description}")
@@ -1829,7 +1829,7 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
                 QApplication.processEvents()
                 return progressDialog.wasCanceled
 
-            DICOMLib.DICOMUtils.loadSeriesByUID([seg_uid], progressCallback=progressCallback)
+            DICOMLib.DICOMUtils.loadSeriesByUID([segmentationUID], progressCallback=progressCallback)
 
             if progressDialog.wasCanceled:
                 break

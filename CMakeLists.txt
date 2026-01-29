@@ -7,9 +7,8 @@ project(SegmentationVerification)
 set(EXTENSION_HOMEPAGE "https://github.com/ImagingDataCommons/CrossSegmentationExplorer")
 set(EXTENSION_CONTRIBUTORS "Lena Giebeler")
 set(EXTENSION_DESCRIPTION "Tools for the visual inspection and comparison of multiple segmentations on the same volume.")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/cpinter/SlicerSegmentationVerification/main/SegmentationVerification.png")
-set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/cpinter/SlicerSegmentationVerification/main/SegmentationVerification_Screenshot.png")
-set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/ImagingDataCommons/CrossSegmentationExplorer/main/CrossSegmentationExplorer/Resources/Icons/SegmentationComparison.png")
+set(EXTENSION_DEPENDS "QuantitativeReporting")
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
