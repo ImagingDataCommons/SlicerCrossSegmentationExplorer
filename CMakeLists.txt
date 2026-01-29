@@ -7,8 +7,10 @@ project(CrossSegmentationExplorer)
 set(EXTENSION_HOMEPAGE "https://github.com/ImagingDataCommons/CrossSegmentationExplorer")
 set(EXTENSION_CONTRIBUTORS "Lena Giebeler")
 set(EXTENSION_DESCRIPTION "Tools for the visual inspection and comparison of multiple segmentations on the same volume.")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/ImagingDataCommons/CrossSegmentationExplorer/main/CrossSegmentationExplorer/Resources/Icons/CrossSegmentationExplorer.png")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/ImagingDataCommons/CrossSegmentationExplorer/main/CrossSegmentationExplorer/Resources/Icons/logo.png")
+set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/ImagingDataCommons/CrossSegmentationExplorer/main/CrossSegmentationExplorer/Resources/Screenshot/RibsGroup.png")
 set(EXTENSION_DEPENDS "QuantitativeReporting")
+set(EXTENSION_CATEGORY "Segmentation")
 
 #-----------------------------------------------------------------------------
 # Extension dependencies

@@ -1760,7 +1760,6 @@ class CrossSegmentationExplorerLogic(ScriptedLoadableModuleLogic):
             dataset = pydicom.dcmread(series_files[0], stop_before_pixels = True, specific_tags = ["ReferencedSeriesSequence"])
             return dataset.ReferencedSeriesSequence[0].SeriesInstanceUID
         except Exception as e:
-            print(e)
             return None
         
     def getSegmentationSopInstanceUID(self, series_uid):
@@ -1800,7 +1799,6 @@ class CrossSegmentationExplorerLogic(ScriptedLoadableModuleLogic):
         and dicom_database.fieldForSeries("Modality", uid) == "SEG"
         and self.getReferencedCtSeries(uid) == series_instance_uid
         ]
-        print(segmentation_series)
 
         if not segmentation_series:
             return
@@ -1856,9 +1854,9 @@ class CrossSegmentationExplorerTest(ScriptedLoadableModuleTest):
     def runTest(self):
         """Run as few or as many tests as needed here."""
         self.setUp()
-        self.test_SegmentationComparison1()
+        self.testCrossSegmentationExplorer()
 
-    def test_SegmentationComparison1(self):
+    def testCrossSegmentationExplorer(self):
         """Ideally you should have several levels of tests.  At the lowest level
         tests should exercise the functionality of the logic with different inputs
         (both valid and invalid).  At higher levels your tests should emulate the
