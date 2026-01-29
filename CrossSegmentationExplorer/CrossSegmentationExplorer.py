@@ -18,7 +18,7 @@ def _restoreCustomLayout(caller, event):
 
   layoutNode = slicer.util.getNode('*LayoutNode*')
   parameterNode = slicer.mrmlScene.GetSingletonNode(
-    'SegmentationComparison', 'vtkMRMLScriptedModuleNode')
+    'CrossSegmentationExplorer', 'vtkMRMLScriptedModuleNode')
   if not parameterNode:
      return
 
@@ -35,10 +35,10 @@ def _restoreCustomLayout(caller, event):
 slicer.mrmlScene.AddObserver(slicer.mrmlScene.EndImportEvent, _restoreCustomLayout)
 
 #
-# SegmentationComparison
+# CrossSegmentationExplorer
 #
 
-class SegmentationComparison(ScriptedLoadableModule):
+class CrossSegmentationExplorer(ScriptedLoadableModule):
     """Uses ScriptedLoadableModule base class, available at:
     https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -59,7 +59,7 @@ class SegmentationComparison(ScriptedLoadableModule):
 
 
 
-class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+class CrossSegmentationExplorerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """Uses ScriptedLoadableModuleWidget base class, available at:
     https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -90,7 +90,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
 
         # Load widget from .ui file (created by Qt Designer).
         # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SegmentationComparison.ui'))
+        uiWidget = slicer.util.loadUI(self.resourcePath('UI/CrossSegmentationExplorer.ui'))
         self.layout.addWidget(uiWidget)
         self.ui = slicer.util.childWidgetVariables(uiWidget)
 
@@ -101,7 +101,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self.ui.volumeNodeComboBox.setMRMLScene(slicer.mrmlScene)
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
-        self.logic = SegmentationComparisonLogic()
+        self.logic = CrossSegmentationExplorerLogic()
 
         #Creates a Mapping Volumes -> Segmentation Files (Everytime a new segmentation node or volume is added it updates)
         self._buildSegmentationVolumeMap()
@@ -330,7 +330,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         mapping_json = self._parameterNode.GetParameter("ModelKeywordMapping")
         if not mapping_json:
             settings = qt.QSettings()
-            mapping_json = settings.value("SegmentationComparison/ModelKeywordMapping", "") or "{}"
+            mapping_json = settings.value("CrossSegmentationExplorer/ModelKeywordMapping", "") or "{}"
         
         #Write the pre-saved Modelnames and the Keyword in the table in the pop up
         #Through the connections the funktion to load the Models in the Combo Box is called automatically here
@@ -360,7 +360,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         group_mapping_json = self._parameterNode.GetParameter("GroupKeywordMapping")
         if not group_mapping_json:
             settings = qt.QSettings()
-            group_mapping_json = settings.value("SegmentationComparison/GroupKeywordMapping", "") or "{}"
+            group_mapping_json = settings.value("CrossSegmentationExplorer/GroupKeywordMapping", "") or "{}"
 
         #Write the pre-saved Groupnames and the Keyword in the table in the pop up
         #Through the connections the function to load the Segment Groups in the Combo Box is called automatically here
@@ -548,7 +548,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         """
         mapping = self.logic.readMappingTable(self.dialogUi.modelNametableWidget)
         settings = qt.QSettings()
-        settings.setValue("SegmentationComparison/ModelKeywordMapping",
+        settings.setValue("CrossSegmentationExplorer/ModelKeywordMapping",
                         json.dumps(mapping))
 
     def onAddRow(self):
@@ -599,7 +599,7 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         """
         mapping = self.logic.readMappingTable(self.dialogGroupUi.addGrouptable)
         settings = qt.QSettings()
-        settings.setValue("SegmentationComparison/GroupKeywordMapping",
+        settings.setValue("CrossSegmentationExplorer/GroupKeywordMapping",
                         json.dumps(mapping))
 
     def onAddRowGroup(self):
@@ -1393,11 +1393,11 @@ class SegmentationComparisonWidget(ScriptedLoadableModuleWidget, VTKObservationM
         self._onSegmentationTableSelectionChanged(idx)
 
 #
-# SegmentationComparisonLogic
+# CrossSegmentationExplorerLogic
 #
 
 
-class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
+class CrossSegmentationExplorerLogic(ScriptedLoadableModuleLogic):
     """This class should implement all the actual
     computation done by your module.  The interface
     should be such that other python code can import
@@ -1838,11 +1838,11 @@ class SegmentationComparisonLogic(ScriptedLoadableModuleLogic):
 
 
 #
-# SegmentationComparisonTest
+# CrossSegmentationExplorerTest
 #
 
 
-class SegmentationComparisonTest(ScriptedLoadableModuleTest):
+class CrossSegmentationExplorerTest(ScriptedLoadableModuleTest):
     """
     This is the test case for your scripted module.
     Uses ScriptedLoadableModuleTest base class, available at:
@@ -1875,7 +1875,7 @@ class SegmentationComparisonTest(ScriptedLoadableModuleTest):
 
         # Test the module logic
 
-        logic = SegmentationComparisonLogic()
+        logic = CrossSegmentationExplorerLogic()
 
 
         self.delayDisplay("Test passed")
