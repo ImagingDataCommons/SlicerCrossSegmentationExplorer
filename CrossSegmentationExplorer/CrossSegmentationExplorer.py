@@ -1520,9 +1520,10 @@ class CrossSegmentationExplorerLogic(ScriptedLoadableModuleLogic):
         Shows segment with segment ID in the corresponding view
         Shows neighboring segments semi transparent based on the bounding boxes when checkbox is clicked
         '''
-        #When Segmentation Node is not none calculate Bounding Boxes for the Segmentation Node
-        if segNode is not None:
-            segmentationNode = segNode
+        segmentationNode = segNode
+        showNeighbors = False
+
+        if segmentationNode is not None:
             showNeighbors = parameterNode.GetParameter("ShowNeighbors") == 'True'
 
         if not segmentationNode:
